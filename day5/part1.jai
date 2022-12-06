@@ -10,6 +10,13 @@ main :: () {
     input := read_entire_file("input.txt");
     data := split(input, "\r\n");
     stacks: [..] Stack;
+    defer {
+        for stack : stacks {
+            array_free(stack.containers);
+        }
+
+        array_free(stacks);
+    }
     stacks_num := (data[0].count + 1) / 4;
     array_reserve(*stacks, stacks_num);
     for i: 0..stacks_num - 1 {
