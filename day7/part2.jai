@@ -3,6 +3,7 @@
 #import "String";
 #import "Text_File_Handler";
 #import "Hash_Table";
+#import "Sort";
 
 Directory_Info :: struct {
     path: string;
@@ -17,6 +18,12 @@ main :: () {
     start_file(*h, test_file, test_file);
     current_path := "";
     directory_info: Table(string, Directory_Info);
+    defer {
+        for dir: directory_info {
+            array_free(dir.dirs);
+        }
+        uninit(*directory_info);
+    }
     line, found := consume_next_line(*h);
     while found {
         if begins_with(line, "$") {
@@ -84,13 +91,26 @@ main :: () {
 
     }
 
-    total_sum := 0;
+    DISK_SPACE :: 70_000_000;
+    REQUIRED_SPACE :: 30_000_000;
+    free_space := DISK_SPACE - get_dir_sum(*directory_info, "/");
+    min_memory_free := REQUIRED_SPACE - free_space;
+
+    dir_candidates: [..] int;
+    defer array_free(dir_candidates);
     for entry: directory_info {
         size := get_dir_sum(*directory_info, entry.path);
-        if size <= 100000 {
-            total_sum += size;
+        if size >= min_memory_free {
+            array_add(*dir_candidates, size);
+        }   
+    }
+
+    min_size_dir := dir_candidates[0];
+    for candidate: dir_candidates {
+        if candidate < min_size_dir {
+            min_size_dir = candidate;
         }
     }
 
-    print("total sum: %\n", total_sum);
+    print("minimum size directory: %\n", min_size_dir);
 }
