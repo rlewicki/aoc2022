@@ -1,0 +1,5 @@
+*.exe
+*.pdb
+.vs
+.build
+input.txt
